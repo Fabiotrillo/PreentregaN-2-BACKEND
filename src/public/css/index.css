@@ -1,0 +1,39 @@
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px;
+    padding: 16px;
+    width: 250px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.product-image {
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid #ddd;
+}
+
+.product-details {
+    padding: 16px;
+}
+
+.product-details h2 {
+    margin-bottom: 8px;
+}
+
+.product-description {
+    color: #555;
+    margin-bottom: 12px;
+}
+
+.product-price {
+    font-weight: bold;
+    color: #007BFF;
+    margin-bottom: 8px;
+}
+
+.product-stock {
+    color: #28A745;
+}

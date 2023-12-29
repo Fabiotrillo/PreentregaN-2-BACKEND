@@ -1,0 +1,17 @@
+<div>
+  <div class="container">
+        <h1>Listado de Productos</h1>
+        
+        {{#each products}}
+            <div class="product">
+                <h2>{{title}}</h2>
+                <p>{{description}}</p>
+                <p>Precio: ${{price}}</p>
+                <p>Stock: {{stock}}</p>
+                <!-- Agrega más campos según tus necesidades -->
+            </div>
+        {{/each}}
+
+    </div>
+   
+</div>
