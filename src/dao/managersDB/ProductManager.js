@@ -4,14 +4,6 @@ import productModel from "../db/models/products.model.js";
 class ProductManager {
     // Obtener todos los productos paginados y filtrados
     getProducts = async (limit, page, sort, category, availability, query) => {
-
-        if (page && (isNaN(page) || page <= 0)) {
-            return {
-                status: "error",
-                msg: "Page not found"
-            };
-        }
-
         const filter = {};
         if (category) {
             filter.category = category;
@@ -19,7 +11,6 @@ class ProductManager {
         if (availability) {
             filter.stock = { $gt: 0 };
         }
-
         if (query) {
             filter.$or = [
                 { title: { $regex: new RegExp(query, 'i') } },
@@ -27,46 +18,45 @@ class ProductManager {
         }
 
         const options = {
-            limit: limit ?? 10,
-            page: page ?? 1,
-            sort: { price: sort === "asc" ? 1 : -1},
+            limit: limit ? parseInt(limit, 10) : 5,
+            page: page !== undefined ? parseInt(page, 10) : 1,
+            sort: { price: sort === "asc" ? 1 : -1 },
             lean: true
-        }
+        };
 
         const products = await productModel.paginate(filter, options);
 
-    
-        const queryParams = {
-            limit,
+        const queryParamsForPagination = {
+            limit: options.limit,
+            page: options.page,
             sort,
             category,
             availability,
             query
         };
-        
-        Object.keys(queryParams).forEach(key => queryParams[key] === undefined && delete queryParams[key]);
-        
+
+        // Elimina las propiedades con valores `undefined`
+        Object.keys(queryParamsForPagination).forEach(
+            key => queryParamsForPagination[key] === undefined && delete queryParamsForPagination[key]
+        );
+
         const baseLink = '/products';
-        
-        let prevLink = null
-        let nextLink = null
-        
-        if (products.hasPrevPage) {
-            queryParams.page = products.prevPage;
-            prevLink = `${baseLink}?${new URLSearchParams(queryParams).toString()}`;
-        }
-        
-        if (products.hasNextPage) {
-            queryParams.page = products.nextPage;
-            nextLink = `${baseLink}?${new URLSearchParams(queryParams).toString()}`;
-        }
-        
-        products.prevLink = prevLink
-        products.nextLink = nextLink
+        const prevLink = products.hasPrevPage
+            ? `${baseLink}?${new URLSearchParams({ ...queryParamsForPagination, page: options.page - 1 }).toString()}`
+            : null;
+
+        const nextLink = products.hasNextPage
+            ? `${baseLink}?${new URLSearchParams({ ...queryParamsForPagination, page: options.page + 1 }).toString()}`
+            : null;
+
         return {
             status: "success",
-            msg: products
-        }
+            msg: {
+                ...products,
+                prevLink,
+                nextLink
+            }
+        };
     };
     // Obtener un producto por ID
     getProductByID = async (pid) => {
@@ -98,7 +88,7 @@ class ProductManager {
                 thumbnail,
             });
 
-            
+
 
             return {
                 status: "Success",

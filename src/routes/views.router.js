@@ -11,7 +11,6 @@ router.get('/products', async (req, res) => {
 
         // Get the paginated list of products
         const productsResponse = await manager.getProducts(limit, page, sort, category, availability, query);
-        
         // Render the products view with the obtained list
 
         res.render('products',  {products: productsResponse.msg});
