@@ -1,17 +1,31 @@
-<div>
-  <div class="container">
-        <h1>Listado de Productos</h1>
-        
-        {{#each products}}
-            <div class="product">
-                <h2>{{title}}</h2>
-                <p>{{description}}</p>
-                <p>Precio: ${{price}}</p>
-                <p>Stock: {{stock}}</p>
-                <!-- Agrega más campos según tus necesidades -->
-            </div>
-        {{/each}}
+<h1>Nuestros productos</h1>
+<div class="container">
+    {{!-- Itera sobre los productos en el carrito y muestra la información --}}
+    {{#each products.docs}}
+    <div class="product-card">
+        <h2>{{title}}</h2>
+        <img src="{{thumbnail}}" alt="{{title}}" class="product-image">
+        <p class="product-description">{{description}}</p>
+        <p class="product-price">Precio: ${{price}}</p>
+        <p class="product-stock">Stock: {{stock}}</p>
 
+        <form action="/api/carts" method="post">
+            <input type="hidden" name="products" value="{{this._id}}">
+            <input type="hidden" name="quantity" value= 1>
+            <input type="submit" value="Agregar al Carrito">
+        </form>
     </div>
-   
+    {{/each}}
+
+    <div>
+        <!-- Pagination -->
+        {{#if products.hasPrevPage}}
+            <a href="{{ products.prevLink }}">Anterior</a>
+        {{/if}}
+        {{#if products.hasNextPage}}
+            <a href="{{ products.nextLink }}">Siguiente</a>
+        {{else}}
+            <p>No hay productos disponibles.</p>
+        {{/if}}
+    </div>
 </div>

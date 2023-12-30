@@ -3,25 +3,71 @@ import productModel from "../db/models/products.model.js";
 
 class ProductManager {
     // Obtener todos los productos paginados y filtrados
-    getProducts = async (options) => {
+    getProducts = async (limit, page, sort, category, availability, query) => {
 
-        try {
-           
-
-            const products = await productModel.paginate({}, {...options, lean: true});
+        if (page && (isNaN(page) || page <= 0)) {
             return {
-                status: "Success",
-                msg: products
-            };
-        } catch (error) {
-            console.error('Error al intentar obtener productos:', error.message);
-            return {
-                status: "Error",
-                msg: error.message,
+                status: "error",
+                msg: "Page not found"
             };
         }
-    }
 
+        const filter = {};
+        if (category) {
+            filter.category = category;
+        }
+        if (availability) {
+            filter.stock = { $gt: 0 };
+        }
+
+        if (query) {
+            filter.$or = [
+                { title: { $regex: new RegExp(query, 'i') } },
+            ];
+        }
+
+        const options = {
+            limit: limit ?? 10,
+            page: page ?? 1,
+            sort: { price: sort === "asc" ? 1 : -1},
+            lean: true
+        }
+
+        const products = await productModel.paginate(filter, options);
+
+    
+        const queryParams = {
+            limit,
+            sort,
+            category,
+            availability,
+            query
+        };
+        
+        Object.keys(queryParams).forEach(key => queryParams[key] === undefined && delete queryParams[key]);
+        
+        const baseLink = '/products';
+        
+        let prevLink = null
+        let nextLink = null
+        
+        if (products.hasPrevPage) {
+            queryParams.page = products.prevPage;
+            prevLink = `${baseLink}?${new URLSearchParams(queryParams).toString()}`;
+        }
+        
+        if (products.hasNextPage) {
+            queryParams.page = products.nextPage;
+            nextLink = `${baseLink}?${new URLSearchParams(queryParams).toString()}`;
+        }
+        
+        products.prevLink = prevLink
+        products.nextLink = nextLink
+        return {
+            status: "success",
+            msg: products
+        }
+    };
     // Obtener un producto por ID
     getProductByID = async (pid) => {
         try {
@@ -51,6 +97,8 @@ class ProductManager {
                 category,
                 thumbnail,
             });
+
+            
 
             return {
                 status: "Success",

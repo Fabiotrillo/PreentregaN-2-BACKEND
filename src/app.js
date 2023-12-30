@@ -29,7 +29,7 @@ app.set("views", __dirname + "/views");
 app.use("/", express.static(__dirname + "/public"));
 
 //app.use("/", viewsRouter);
-app.use("/products", viewsRouter)
+app.use("/", viewsRouter)
 app.use("/api/products", ProductRouter);
 app.use("/api/carts", CartRouter);
 
